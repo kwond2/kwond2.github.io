@@ -1,0 +1,309 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+  <title>dk's Website</title>
+
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <meta name="author" content="gradientBoosting" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+  \(
+\newcommand{\bm}[1]{\boldsymbol{#1}}
+
+
+%% macros for vectors
+\newcommand{\va}{{\mathbf{a}}}
+\newcommand{\vb}{{\mathbf{b}}}
+\newcommand{\vc}{{\mathbf{c}}}
+\newcommand{\vd}{{\mathbf{d}}}
+\newcommand{\ve}{{\mathbf{e}}}
+\newcommand{\vf}{{\mathbf{f}}}
+\newcommand{\vg}{{\mathbf{g}}}
+\newcommand{\vh}{{\mathbf{h}}}
+\newcommand{\vi}{{\mathbf{i}}}
+\newcommand{\vj}{{\mathbf{j}}}
+\newcommand{\vk}{{\mathbf{k}}}
+\newcommand{\vl}{{\mathbf{l}}}
+\newcommand{\vm}{{\mathbf{m}}}
+\newcommand{\vn}{{\mathbf{n}}}
+\newcommand{\vo}{{\mathbf{o}}}
+\newcommand{\vp}{{\mathbf{p}}}
+\newcommand{\vq}{{\mathbf{q}}}
+\newcommand{\vr}{{\mathbf{r}}}
+\newcommand{\vs}{{\mathbf{s}}}
+\newcommand{\vt}{{\mathbf{t}}}
+\newcommand{\vu}{{\mathbf{u}}}
+\newcommand{\vv}{{\mathbf{v}}}
+\newcommand{\vw}{{\mathbf{w}}}
+\newcommand{\vx}{{\mathbf{x}}}
+\newcommand{\vy}{{\mathbf{y}}}
+\newcommand{\vz}{{\mathbf{z}}}
+
+%% macros for matrices
+\newcommand{\vA}{{\mathbf{A}}}
+\newcommand{\vB}{{\mathbf{B}}}
+\newcommand{\vC}{{\mathbf{C}}}
+\newcommand{\vD}{{\mathbf{D}}}
+\newcommand{\vE}{{\mathbf{E}}}
+\newcommand{\vF}{{\mathbf{F}}}
+\newcommand{\vG}{{\mathbf{G}}}
+\newcommand{\vH}{{\mathbf{H}}}
+\newcommand{\vI}{{\mathbf{I}}}
+\newcommand{\vJ}{{\mathbf{J}}}
+\newcommand{\vK}{{\mathbf{K}}}
+\newcommand{\vL}{{\mathbf{L}}}
+\newcommand{\vM}{{\mathbf{M}}}
+\newcommand{\vN}{{\mathbf{N}}}
+\newcommand{\vO}{{\mathbf{O}}}
+\newcommand{\vP}{{\mathbf{P}}}
+\newcommand{\vQ}{{\mathbf{Q}}}
+\newcommand{\vR}{{\mathbf{R}}}
+\newcommand{\vS}{{\mathbf{S}}}
+\newcommand{\vT}{{\mathbf{T}}}
+\newcommand{\vU}{{\mathbf{U}}}
+\newcommand{\vV}{{\mathbf{V}}}
+\newcommand{\vW}{{\mathbf{W}}}
+\newcommand{\vX}{{\mathbf{X}}}
+\newcommand{\vY}{{\mathbf{Y}}}
+\newcommand{\vZ}{{\mathbf{Z}}}
+
+\newcommand{\vlam}{{\bm{\lambda}}}
+\newcommand{\vtheta}{{\bm{\theta}}}
+\newcommand{\veta}{{\bm{\eta}}}
+\newcommand{\vell}{{\bm{\ell}}}
+\newcommand{\vxi}{{\bm{\xi}}}
+\newcommand{\vom}{\boldsymbol{\omega}}
+\newcommand{\om}{{\omega}}
+\newcommand{\tbit}[1]{\textbf{\textit{#1}}}
+\newcommand{\trs}{{\top}}
+
+%% macros for sets
+\newcommand{\cA}{{\mathcal{A}}}
+\newcommand{\cB}{{\mathcal{B}}}
+\newcommand{\cC}{{\mathcal{C}}}
+\newcommand{\cD}{{\mathcal{D}}}
+\newcommand{\cE}{{\mathcal{E}}}
+\newcommand{\cF}{{\mathcal{F}}}
+\newcommand{\cG}{{\mathcal{G}}}
+\newcommand{\cH}{{\mathcal{H}}}
+\newcommand{\cI}{{\mathcal{I}}}
+\newcommand{\cJ}{{\mathcal{J}}}
+\newcommand{\cK}{{\mathcal{K}}}
+\newcommand{\cL}{{\mathcal{L}}}
+\newcommand{\cM}{{\mathcal{M}}}
+\newcommand{\cN}{{\mathcal{N}}}
+\newcommand{\cO}{{\mathcal{O}}}
+\newcommand{\cP}{{\mathcal{P}}}
+\newcommand{\cQ}{{\mathcal{Q}}}
+\newcommand{\cR}{{\mathcal{R}}}
+\newcommand{\cS}{{\mathcal{S}}}
+\newcommand{\cT}{{\mathcal{T}}}
+\newcommand{\cU}{{\mathcal{U}}}
+\newcommand{\cV}{{\mathcal{V}}}
+\newcommand{\cW}{{\mathcal{W}}}
+\newcommand{\cX}{{\mathcal{X}}}
+\newcommand{\cY}{{\mathcal{Y}}}
+\newcommand{\cZ}{{\mathcal{Z}}}
+
+
+
+%
+\newcommand{\vareps}{\varepsilon}
+
+%% macros for the real and imaginary parts
+\newcommand{\ri}{{\mathrm{i}}}
+\newcommand{\rr}{{\mathrm{r}}}
+
+%% macros for math notions and operators
+\newcommand{\EE}{\mathbb{E}} % expectation
+\newcommand{\RR}{\mathbb{R}} % real
+\newcommand{\CC}{\mathbb{C}} % complex
+\newcommand{\ZZ}{\mathbb{Z}} % integer
+\renewcommand{\SS}{{\mathbb{S}}} % symmetric matrix
+\newcommand{\SSp}{\mathbb{S}_{+}} % symmetric positive semi-definite matrix
+\newcommand{\SSpp}{\mathbb{S}_{++}} % symmetric positive definite matrix
+\newcommand{\sign}{\mathrm{sign}} % sign function
+\newcommand{\vzero}{\mathbf{0}} % 0 vector
+\newcommand{\vone}{{\mathbf{1}}} % 1 vector
+\newcommand{\grad}{{\nabla}}    % gradient
+\newcommand{\dist}{\mathrm{dist}}    % distance
+\newcommand{\op}{{\mathrm{op}}} % subscript for operator norm
+\newcommand{\opt}{{\mathrm{opt}}} % subscript for optimal solution
+%\newcommand{\supp}{{\mathrm{supp}}} % support
+\newcommand{\Prob}{{\mathrm{Prob}}} % probability
+\newcommand{\prox}{{\mathbf{prox}}} % proximal map
+\newcommand{\Diag}{{\mathrm{Diag}}} % vector -> diagonal matrix
+\newcommand{\diag}{{\mathrm{diag}}} % matrix diagonal -> vector
+\newcommand{\dom}{{\mathrm{dom}}} % domain
+\newcommand{\rank}{\textnormal{rank}}
+
+\newcommand{\tr}{{\mathrm{tr}}} % trace
+\newcommand{\TV}{{\mathrm{TV}}} % total variation
+\newcommand{\Proj}{{\mathrm{Proj}}} % projection
+\newcommand{\Null}{{\mathrm{Null}}} % null space
+\newcommand{\Dim}{{\mathrm{dim}}} % dimension
+\newcommand{\conv}{{\mathrm{conv}}} % convex hull
+\newcommand{\clos}{{\mathrm{cl}}} % closure
+\newcommand{\inte}{{\mathrm{int}}} % interior
+\newcommand{\etal}{{\textit{et al.}}}
+\newcommand{\conj}{{\mathrm{conj}}} % conjugate
+\newcommand{\vvec}{{\mathrm{vec}}}
+\newcommand{\fold}{{\mathbf{fold}}} % fold into a tensor
+\newcommand{\unfold}{{\mathbf{unfold}}} % unfold a tensor
+\newcommand{\fit}{{\mathrm{fit}}} % data fitting
+\newcommand{\obj}{{\mathrm{obj}}} % data fitting
+\newcommand{\round}{{\mathrm{round}}}
+\newcommand{\epi}{\mathrm{epi}} %epigraph
+\newcommand{\hyp}{\mathrm{hyp}} %hypograph
+
+% rounding number
+\newcommand{\err}{{\mathrm{err}}}
+\newcommand{\ST}{\mbox{ subject to }}
+\newcommand{\st}{\mbox{ s.t. }}
+
+\newcommand{\ip}[2]{\langle #1 , #2 \rangle}
+\newcommand{\by}{{\bf y}}
+\newcommand{\bxs}{{\bf x}_{\epsilon,\lambda,q}}
+\newcommand{\od}{\frac{d}{dt}}
+\newcommand{\pd}{{\partial }}
+\newcommand{\rankk}{{\hbox{rank}}}
+
+
+
+
+\newcommand{\prev}{{\mathrm{prev}}} % previous iteration
+
+\DeclareMathOperator{\shrink}{shrink} % shrinkage
+\DeclareMathOperator{\hardthr}{hardthr} % hard thresholding
+\DeclareMathOperator*{\argmin}{arg\,min} % argmin
+\DeclareMathOperator*{\argmax}{arg\,max} % argmax
+
+\DeclareMathOperator*{\Min}{minimize}
+\DeclareMathOperator*{\Max}{maximize}
+
+
+
+%% macros for environments math equations
+
+\newcommand{\bc}{\begin{center}}
+\newcommand{\ec}{\end{center}}
+
+\newcommand{\bdm}{\begin{displaymath}}
+\newcommand{\edm}{\end{displaymath}}
+
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+
+\newcommand{\bfl}{\begin{flushleft}}
+\newcommand{\efl}{\end{flushleft}}
+
+\newcommand{\bt}{\begin{tabbing}}
+\newcommand{\et}{\end{tabbing}}
+
+\newcommand{\beqn}{\begin{eqnarray}}
+\newcommand{\eeqn}{\end{eqnarray}}
+
+\newcommand{\beqs}{\begin{align*}} % no equation numbers
+\newcommand{\eeqs}{\end{align*}}  % no equation numbers
+
+%% macros for theorem-like environments
+
+\newtheorem{theorem}{Theorem}[section]
+%\newtheorem{acknowledgement}{Acknowledgement}[section]
+%\newtheorem{axiom}{Axiom}[section]
+%\newtheorem{algorithm}{Algorithm}[section]
+%\newtheorem{case}{Case}[section]
+\newtheorem{claim}{Claim}[section]
+%\newtheorem{conclusion}{Conclusion}[section]
+%\newtheorem{condition}{Condition}[section]
+%\newtheorem{conjecture}{Conjecture}[section]
+\newtheorem{corollary}{Corollary}[section]
+%\newtheorem{criterion}{Criterion}[section]
+\newtheorem{defn}{Definition}[section]
+\newtheorem{example}{Example}[section]
+%\newtheorem{exercise}{Exercise}[section]
+\newtheorem{lemma}{Lemma}[section]
+%\newtheorem{notation}{Notation}[section]
+%\newtheorem{problem}{Problem}[section]
+\newtheorem{prop}{Proposition}[section]
+\newtheorem{remark}{Remark}[section]
+\newtheorem{assumption}{Assumption}
+%\newtheorem{solution}{Solution}[section]
+%\newtheorem{summary}{Summary}[section]
+
+
+
+\newcommand{\hvx}{{\hat{\vx}}}
+
+    
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatibility definitions
+    \def\gt{>}
+    \def\lt{<}
+    \let\Oldtex\TeX
+    \let\Oldlatex\LaTeX
+    \renewcommand{\TeX}{\textrm{\Oldtex}}
+    \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
+    % Document parameters
+    \)
+  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+    <tr style="padding:0px">
+      <td style="padding:0px">
+        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+          <tr style="padding:0px">
+            <td style="padding:2.5%;width:60%;vertical-align:middle">
+              <h1>
+                Gradient Boosting
+              </h1>
+              <p> 
+              </p>
+              <p style="text-align:center">
+                <a target="_blank" href="https://mailhide.io/e/ic2mIgD8"> Email</a> &nbsp;/&nbsp;
+                <a href="https://github.com/kwond2">GitHub</a> &nbsp;/&nbsp;
+                <a href="https://www.linkedin.com/in/dukekwon"> LinkedIn </a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+\(
+
+\textbf{Recommended Background:}\\
+Understanding of gradients, hessians, basic machine learning theory (loss, functional approximation, generalization).
+
+\textbf{Key Takeaways:}\\
+Mathematically intuitive understanding of gradient boosting.
+
+\textbf{Preliminaries:}\\
+At a high level, gradient boosting can be thought of as functional gradient descent -- iteratively (greedily) learning a series of functions fit to the negative gradient (residual) of the loss function. This differs from the classical approach of optimizing the parameters of the loss function, which in turn would result in a decrease in loss. It can be thought of as a type of ensemble learning, where high bias, low variance learners produce a mathematically combined (in this case, via a learning-rate weighted sum) prediction. More on this later.
+
+\textbf{CART}, Classification and Regression Trees, is the standard "weak" learner boosting procedures tend to use. The intuition between the two problem classes are very similar, so we'll show the intuition primarily for the regression case.
+
+\textbf{Regression Trees:}\\
+
+If you're unfamiliar with decision tree models, the regression tree model learns some threshold (numerical or class-oriented) on the features that best minimize the loss. For example,
+
+
+\textbf{Key Idea Focus: Gradient Boosting Regression:}\\
+
+\)
+
+</body>
+
+</html>
+
