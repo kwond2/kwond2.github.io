@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Duke Kwon" />
+  <title>Mechanisms of Attention &amp; Transformers</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Mechanisms of Attention &amp; Transformers</h1>
+<p class="author">Duke Kwon</p>
+</header>
+<p><em>Draft 1, 5/26/24</em></p>
+<p><strong>Recommended Background:</strong><br />
+Linear algebra, Basic machine learning theory (loss, functional
+approximation, generalization), multilayer perceptrons/neural
+networks.</p>
+<p><strong>Key Takeaways:</strong><br />
+Mathematical intuition of the attention mechanism and the transformer
+architecture</p>
+<p><strong>Preliminaries:</strong><br />
+Perhaps the most important step to do any sort of ML work is to be able
+to mathematically model the problem effectively. If you’re unfamiliar
+with the NLP space, we need to somehow numerically represent words and
+sentences to actually be used as data. The simple approach would be to
+one-hot encode a vocabulary to use as the data itself, i.e., represent
+each word as a standard basis vector in a unique dimension. However,
+this obviously doesn’t encode a lot of the important ties and
+information between words. We introduce Word2Vec, an algorithm (I think
+released in 2013?) learning vector representations of words, with
+"semantic similarity" being embedded into the space by using a distance
+or similarity measure between the vectors. The approach used the
+autoencoder model, which can be thought of as a feed forward neural
+network doing some nonlinear compression by an encoder to decoder
+approach. [Annot 1: More information on Word2Vec training]. Effectively
+the model learns to predict the context given a word, and the word given
+the context. The model is then chopped at the end (prediction/softmax
+layer), where a vector space lies that associates word vectors seen
+together to be numerically close, and therefore being "semantically
+similar".</p>
+<p><strong>Motivation:</strong><br />
+Word2Vec is a static model in the sense that there is only one vector
+representation of each word, learned/trained off the context. Certainly
+we can train the model consistently to learn new contexts to account for
+data shift, but there will still be scenarios where words can have
+multiple meanings and be semantically similar/distant depending on the
+context. Consider the word <em>bank</em>, which can be used in a variety
+of contexts: <em>the river bank, banking a basketball, a financial
+bank</em>. The dimensionality of the vector space is likely to be
+limited to learn all the possible word-to-word interactions, and thus if
+these varietal contexts are equally distributed in the data, the model
+will have to learn a vector space where the <em>bank</em> vector is
+equidistant from <em>river, basketball, financial</em> (assuming these
+are contextually unrelated). This motivates being able to learn some
+dynamic, <em>contextual</em> representation of word vectors, where we
+<em>pay attention</em> to the context.</p>
+<p><strong>Attention Mechanism:</strong><br />
+Attention is just a new term to coin the well used mathematical idea of
+averaging in the context of word vectors (think statistical expectation
+and weighing by probabilities, or along the lines of adaboost if you’re
+familiar).</p>
+<p><em>(I believe the initial idea was introduced in the RNNSearch
+paper, where they learned an encoder-decoder model with a bidirectional
+RNN (think of an RNN learning sequential dependencies not only from the
+right, but also from the left). They use an encoder-decoder architecture
+for a translation task, where basically the encoder encodes 1-hot
+vectors representing words to a shared space to the decoder, where the
+decoder than transforms the words to corresponding translated words.
+They used a feedforward network (nonlinear) to learn attention weights,
+depending on the current context vector (hidden state), the previous
+word guessed, and the bidirectional hidden states concatenated together
+(previous hidden state, and the future hidden state from the reverse
+direction). The outputs I believe were then softmaxed to produce a valid
+probability distribution, and be used as the averaging weights to the
+next context vector)</em></p>
+<p>In the paper introducing transformers (Attention Is All You Need),
+the idea remains similar: weigh a vector representation by some
+similarity measure on the context. First, here’s a high level overview:
+I’ll talk about the input, the transformations, and the output of what
+we call a self-attention block.</p>
+<p>All parameters are user defined and not set in stone unless specified
+otherwise. The input to the self-attention is pretty standard to NLP: a
+block of token vectors <span class="math inline">\({\mathbf{x}}_i \in
+\mathbb{R}^{d_{model}}\)</span> (paper uses 512), with a block length of
+<span class="math inline">\(L\)</span>. A token is some split component
+of a word via a preprocessing step, tokenization. Given that we have
+control of how we want to preprocess our data, tokenization takes words
+and often splits them into subwords with some base meaning. For example,
+we can take the word "prejudice" and tokenize it into "pre" and
+"judice". A block is just a user defined parameter designating the
+length of the context for a single token. For example, it could be the
+average or max length of the amount of subwords for a sentence in your
+corpus.</p>
+<p>These inputs are projected (linearly) into 3 different vector spaces:
+Key, Query, and Value <span class="math inline">\(\in
+\mathbb{R}^{64}\)</span>. So for each <span
+class="math inline">\({\mathbf{x}}_i\)</span> in the block, <span
+class="math inline">\({\mathbf{W}}_k{\mathbf{x}}_i \mapsto
+{\mathbf{q}}_i, {\mathbf{W}}_q{\mathbf{x}}_i \mapsto {\mathbf{k}}_i,
+{\mathbf{W}}_v{\mathbf{x}}_i \mapsto {\mathbf{v}}_i\)</span>, where
+<span class="math inline">\({\mathbf{W}}_k, {\mathbf{W}}_q \in
+\mathbb{R}^{d_k \times d_{model}}, {\mathbf{W}}_v \in \mathbb{R}^{d_v
+\times d_{model}}\)</span>.</p>
+<p>The idea behind this is similar to what Word2Vec proposes: to learn
+some latent space where some distance or numerical similarity measure
+corresponds to semantic similarity. The key and query vectors function
+as the token representatives in this semantic space, where they use the
+dot-product as a measure of similarity. The query <span
+class="math inline">\({\mathbf{q}}_i\)</span> can be thought of as the
+main context word vector (think about a block being a sliding window
+surrounding a main context word in a sentence, and we do this for each
+word), which we want to measure the similarity to the key vectors
+corresponding to the context (block).</p>
+<p>So we do <span class="math inline">\(L\)</span> dot products for each
+<span class="math inline">\({\mathbf{q}}_i\)</span>, which corresponds
+to a matrix product <span class="math inline">\(QK^{\top}\)</span>,
+<span class="math inline">\(Q,W \in \mathbb{R}^{L\times d_k}\)</span>,
+where <span class="math inline">\({\mathbf{q}}_i\)</span> corresponds to
+row <span class="math inline">\(i\)</span> of matrix <span
+class="math inline">\(Q\)</span>, and column <span
+class="math inline">\(j\)</span> corresponds to <span
+class="math inline">\({\mathbf{k}}_j\)</span>. This results in an <span
+class="math inline">\(L \times L\)</span> matrix, where a row
+corresponds to the current context word <span
+class="math inline">\({\mathbf{q}}_i\)</span> similarity against each
+<span class="math inline">\({\mathbf{k}}_j\)</span> across the columns.
+For numerical stability, they scale down the values by <span
+class="math inline">\(\sqrt{d_k}\)</span>, and then apply a row-wise
+softmax to normalize these similarity weights to a valid probability
+distribution. What we end up with is called the attention matrix. <span
+class="math display">\[A =
+\mbox{softmax}_{row-wise}\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)\]</span>.</p>
+<p>If linear algebra isn’t your strong suite, basically for each query
+vector <span class="math inline">\({\mathbf{q}}_i\)</span>, we evaluated
+how much the surrounding context words (represented as key vectors <span
+class="math inline">\({\mathbf{k}}_j\)</span>) contextually contribute
+or have some semantic similarity to the main context word (represented
+by a query vector <span class="math inline">\({\mathbf{q}}_i\)</span>),
+a total of <span class="math inline">\(L\)</span> similarity
+measurements (includes the measurement with its own key vector <span
+class="math inline">\({\mathbf{k}}_i\)</span>). These pre-softmax
+attention values then are condensed to be within <span
+class="math inline">\([0, 1]\)</span> via row-wise softmax (row-wise
+corresponding to each query in the block), so that we have a
+fractional/probabilitistic representation of the strength of each
+context.</p>
+<p>For each row of attention values corresponding to a query, we then
+compute a weighted sum of the block’s value vectors <span
+class="math inline">\({\mathbf{k}}_j\)</span>, i.e., <span
+class="math inline">\({\mathbf{v}}_i&#39; =
+\sum_{j=1}^{L}\alpha_{ij}{\mathbf{v}}_j\)</span>, weighed by the
+corresponding attention values. In matrix form, this give us: <span
+class="math display">\[V&#39; = Attention(Q, K, V) =
+\mbox{softmax}_{row-wise}\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V =
+AV\]</span> Where <span class="math inline">\(V \in \mathbb{R}^{L \times
+d_v}\)</span> (so rows are value vectors <span
+class="math inline">\({\mathbf{v}}_j\)</span>).</p>
+<p>So each query vector has been "contextualized" by assigning more
+weight to key vectors in the context that it’s close to. The distinction
+to Word2Vec is apparent at this step: whereas Word2Vec generates a space
+to do similarity measurements on the "value vectors"/vectors themselves,
+Attention does the similarity measure in a separate key and query space,
+which they then weigh these similarity measures to the actual value
+vectors. We can expect to have a different contextualized value vector
+<span class="math inline">\({\mathbf{v}}_i&#39;\)</span> for a different
+tokens in the context block (for the same main word).</p>
+<p><em>(In the original RNNSearch paper, they use what’s called
+"Additive Attention", where the attention values are computed from a
+learned feedforward neural network dependent on the bidirectional hidden
+states. Here we use "multiplicative" or dot-product attention).</em></p>
+<p>Finally, the set of <span class="math inline">\(L\)</span> value
+vectors are then projected back up to the dimensionality of <span
+class="math inline">\(d_{model}\)</span>, <span
+class="math inline">\(V&#39;W_o \in \mathbb{R}^{L \times d_{model}}, W_o
+\in \mathbb{R}^{{\mathbf{d}}_v \times d_{model}}\)</span>, which
+effectively is the output of the attention head for the single case.</p>
+<p><em>(The reason it’s called *self* attention is due to the query and
+key vectors coming from the same context. There are instances of
+attention where we can pass key and query vectors from another domain
+(e.g., in translation, representing english words, encoding 1-hot to
+english) to the attention module in another domain (value vectors
+corresponding to french words)).</em></p>
+<p>Given that we understand attention for a "single" head, Multi-Headed
+Self-Attention (MHSA) consists of multiple attention modules within
+itself (the idea is similar to how CNNs have multiple masks/kernels to
+learn a surface). Words often have multiple and important but nuanced
+patterns of context. With only one attention head, we might only capture
+some information about the context dependencies of a word, thus
+motivating multiple heads. With more attention heads, we can a variety
+of contexts that words can be in. The model basically learns multiple
+(<span class="math inline">\(h\)</span> heads) randomly initialized
+linear projection matrices for <span class="math inline">\(Q, K, \&amp;
+V\)</span> in parallel. <span class="math display">\[\mbox{head}_i =
+(QW_q^i, KW_k^i, VW_v^i)\]</span> This corresponds to <span
+class="math inline">\(h\)</span> different attention matrices for an
+input block.</p>
+<p>How does this affect the dimensionality with respect to the outputs?
+To account for this, they set <span class="math inline">\(d_v =
+64\)</span>, and <span class="math inline">\(h = 8\)</span>, so that
+they can concatenate the value vectors/attention heads corresponding to
+different contexts <span class="math inline">\(V_i&#39;\)</span>, where
+<span class="math inline">\(d_v * h = d_{model}\)</span>. Concatenating
+preserves the differences in the learned attention heads (compared to
+averaging, where subtle yet important outlier information can be lost).
+The final projection matrix <span class="math inline">\(W_o\)</span> now
+projects the final concatenated heads to <span
+class="math inline">\(d_{model}, W_o \in \mathbb{R}^{(h*d_v) \times
+d_{model}}\)</span>, similar to the single headed case.</p>
+<p>So while Word2Vec creates "static" semantic vectors learned off of
+context, the attention mechanism learns dynamic semantic vectors
+depending on not only the previously learned context, but the current
+block context. We can notice that a single head of attention does <span
+class="math inline">\(L^2\)</span> dot-products which can be done in
+parallel efficiently, where the sequential order does not mathematically
+matter – this is an issue that will be addressed by the positional
+encoding of the broader transformer architecture.</p>
+<p><strong>Coming soon.</strong><br />
+<strong>Broader Transformer Architecture:</strong><br />
+The MHSA is the key feature of the transformer, but there are a few
+other details to complete the architecture.</p>
+<p><strong>1.) Residual Connections:</strong><br />
+Residual connections are an architectual design between (skip) layers in
+a neural network.</p>
+<p><strong>2.) Layer Normalization:</strong><br />
+Layer normalization is as it sounds – normalizing the neuron values in a
+layer to be mathematically nice, with mean <span
+class="math inline">\(\mu = 0\)</span> and standard deviation <span
+class="math inline">\(\sigma = 1\)</span>.</p>
+<p><strong>3.) Feed Forward Network:</strong><br />
+The transformer integrates a standard feed forward neural network to the
+output (after layer normalization &amp; residual connections) of the
+MHSA.</p>
+<p><strong>4.) Positional Encodings:</strong><br />
+Recall that attention computes context weight by dot products, which
+isn’t positionally dependent and can be done in parallel. However, the
+positioning of a sentence can drastically affect its meaning – it’s an
+important piece of data that would be beneficial to learn. Positional
+encodings are introduced at the inputs of the transformer model, to
+encode sequential or positional information numerically by adding some
+trigonometric function values.</p>
+</body>
+</html>
