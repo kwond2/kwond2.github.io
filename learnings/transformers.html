@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <link rel="stylesheet" type="text/css" href="learningsCSS/imagedim.css" />
   <meta name="author" content="Duke Kwon" />
+    <link rel="stylesheet" type="text/css" href="learningsCSS/imagedim.css" />
   <title>Mechanisms of Attention &amp; Transformers</title>
   <style>
     html {
@@ -180,13 +180,26 @@
 <p class="author">Duke Kwon</p>
 </header>
 <p><em>Draft 1, 5/26/24</em></p>
+<p><em>Draft 2, 6/8/24</em></p>
+
 <p><strong>Recommended Background:</strong><br />
 Linear algebra, Basic machine learning theory (loss, functional
 approximation, generalization), multilayer perceptrons/neural
 networks.</p>
 <p><strong>Key Takeaways:</strong><br />
 Mathematical intuition of the attention mechanism and the transformer
-architecture</p>
+architecture, in an informal, interpretable way.</p>
+<p><strong>Quick Intro:</strong><br />
+Generative AI and LLMs have become the next big craze, especially among
+people with a very limited understanding of how these models actually
+work – however, that’s another topic on general ignorance and lack of
+critical thinking in this world. From an ML perspective, the
+mathematical fundamentals remain the same, as all these models are
+modeled off of this mathematical intuition.</p>
+<p>Not sure how attention and transformers are taught nowadays, but my
+mental image comes from a perspective of word embeddings. <em>(Primarily
+influenced from one of my past professors Dr. Mohammad Zaki, and my work
+as a research data scientist working on topic models).</em></p>
 <p><strong>Preliminaries:</strong><br />
 Perhaps the most important step to do any sort of ML work is to be able
 to mathematically model the problem effectively. If you’re unfamiliar
@@ -195,18 +208,26 @@ sentences to actually be used as data. The simple approach would be to
 one-hot encode a vocabulary to use as the data itself, i.e., represent
 each word as a standard basis vector in a unique dimension. However,
 this obviously doesn’t encode a lot of the important ties and
-information between words. We introduce Word2Vec, an algorithm (I think
-released in 2013?) learning vector representations of words, with
-"semantic similarity" being embedded into the space by using a distance
-or similarity measure between the vectors. The approach used the
-autoencoder model, which can be thought of as a feed forward neural
-network doing some nonlinear compression by an encoder to decoder
-approach. [Annot 1: More information on Word2Vec training]. Effectively
-the model learns to predict the context given a word, and the word given
-the context. The model is then chopped at the end (prediction/softmax
-layer), where a vector space lies that associates word vectors seen
-together to be numerically close, and therefore being "semantically
-similar".</p>
+information between words.</p>
+<p>This was the motivation to a popular word embedding algorithm from
+about 2013, Word2Vec. The algorithm tries to learning vector
+representations of an entire vocabulary, with "semantic similarity"
+embedded into the space by using a distance or similarity measure
+between the vectors. I believe the approach used the autoencoder-esque
+model, which can be thought of as a feed forward neural network doing
+some nonlinear compression by an encoder to decoder approach, but if it
+wasn’t, ultimately some feed forward network is chopped at the end
+(prediction/softmax layer). This layer at the end defines a high
+dimensional distribution of word vectors, with numerically close (cosine
+similarity) vectors are considered "semantically similar". This is
+effectively done by training the model to predict the word given the
+context, and the context given a word (the paper calls these two
+approaches the Continuous Bag of Words model, CBOW, and the Skip-Gram
+model, respectively).</p>
+<p><strong>Minutiae about Word2Vec:</strong> I don’t really like having
+blog posts linking to other blog posts unless they’re worthwhile topics,
+but if there’s interest, I can talk more about the details of
+Word2Vec.</p>
 <p><strong>Motivation:</strong><br />
 Word2Vec is a static model in the sense that there is only one vector
 representation of each word, learned/trained off the context. Certainly
@@ -340,7 +361,7 @@ states. Here we use "multiplicative" or dot-product attention).</em></p>
 <p>Finally, the set of <span class="math inline">\(L\)</span> value
 vectors are then projected back up to the dimensionality of <span
 class="math inline">\(d_{model}\)</span>, <span
-class="math inline">\(V&#39;, W_o \in \mathbb{R}^{L \times d_{model}}, W_o
+class="math inline">\(V&#39;W_o \in \mathbb{R}^{L \times d_{model}}, W_o
 \in \mathbb{R}^{{\mathbf{d}}_v \times d_{model}}\)</span>, which
 effectively is the output of the attention head for the single case.</p>
 <p><em>(The reason it’s called *self* attention is due to the query and
@@ -383,22 +404,65 @@ class="math inline">\(L^2\)</span> dot-products which can be done in
 parallel efficiently, where the sequential order does not mathematically
 matter – this is an issue that will be addressed by the positional
 encoding of the broader transformer architecture.</p>
-<p><strong>Coming soon.</strong><br />
-<strong>Broader Transformer Architecture:</strong><br />
+<p><strong>Broader Transformer Architecture:</strong><br />
 The MHSA is the key feature of the transformer, but there are a few
 other details to complete the architecture.</p>
 <p><strong>1.) Residual Connections:</strong><br />
 Residual connections are an architectual design between (skip) layers in
-a neural network.</p>
+a neural network. They function as a simple to improve
+connectivity/information flow across the model. Basically, data is
+passed directly to the output of the next layer, on top of whatever was
+passed into the current layer. For example, suppose our MHSA module
+produces nothing worthwhile, maybe in the initial steps of training.
+With a residual connection layer, "residual" or remaining data is still
+passed to the next layer. This is usually a sum of the input to the
+output vectors in the next layer. Thus, we don’t directly lose anything
+if MHSA fails to contribute effectively. Residual connections also help
+to improve issues with vanishing gradients for longer neural networks.
+Backpropagation does powers of matrices to get the interactions of the
+loss to specific weights via the chain rule, which amplifies the
+dominant eigenvalue <span class="math inline">\(\lambda_1\)</span> to
+either go to <span class="math inline">\(\infty\)</span> (exploding
+gradients) or 0. Residual connections provide additional data to be
+moved across the network to alleviate some of this.</p>
+<p><em>From a numerical linear algebra perspective, this is similar to
+the power method/dominant eigenvalue/eigenvector methods. Let’s consider
+a matrix <span class="math inline">\({\mathbf{A}}\in \mathbb{R}^{n\times
+n}\)</span> with a dominant eigenvalue <span
+class="math inline">\(\lambda_1\)</span>. If we take some random vector
+<span class="math inline">\({\mathbf{x}}\in \mathbb{R}^n\)</span>, with
+probability 1, <span class="math inline">\({\mathbf{x}}\)</span> can be
+represented as a non-zero combination of the eigenvectors of <span
+class="math inline">\({\mathbf{A}}\)</span>, <span
+class="math inline">\({\mathbf{x}}=
+\sum_{i=1}^{n}\lambda_i{\mathbf{v}}_i, \lambda_i \neq 0, \forall i = 1,
+\dots, n\)</span>. Then <span
+class="math inline">\({\mathbf{A}}^k{\mathbf{x}}=
+\sum_{i=1}^{n}\lambda_i{\mathbf{A}}^k{\mathbf{v}}_i =
+\sum_{i=1}^{n}\lambda_i^k{\mathbf{v}}_i\)</span>, where <span
+class="math inline">\(\lambda_1^k\)</span> becomes the dominating term.
+Notice how if <span class="math inline">\(\lambda_i &lt; 1\)</span>,
+<span class="math inline">\(\lambda_i^k \rightarrow 0\)</span>, and if
+<span class="math inline">\(\lambda_i &gt; 1\)</span>, <span
+class="math inline">\(\lambda_i^k \rightarrow \infty\)</span>, as <span
+class="math inline">\(k \rightarrow \infty\)</span>. This will actually
+bring us to normalizing, which is next.</em></p>
 <p><strong>2.) Layer Normalization:</strong><br />
 Layer normalization is as it sounds – normalizing the neuron values in a
 layer to be mathematically nice, with mean <span
 class="math inline">\(\mu = 0\)</span> and standard deviation <span
-class="math inline">\(\sigma = 1\)</span>.</p>
+class="math inline">\(\sigma = 1\)</span>. This helps us keep the
+gradients and transformations across layers to remain within the same
+scale. Given that we tend to use one learning rate for all the weight
+updates, keeping the layers numerically consistent tends to improve the
+stability of the training procedure, getting to the optimal much
+quicker. Note that the residual layer is first added to the output of
+the feed fordward layer token-wise (element-wise) before
+normalizing.</p>
 <p><strong>3.) Feed Forward Network:</strong><br />
 The transformer integrates a standard feed forward neural network to the
 output (after layer normalization &amp; residual connections) of the
-MHSA.</p>
+MHSA. This FFN is implemented token-wise (element-wise).</p>
 <p><strong>4.) Positional Encodings:</strong><br />
 Recall that attention computes context weight by dot products, which
 isn’t positionally dependent and can be done in parallel. However, the
@@ -407,5 +471,26 @@ important piece of data that would be beneficial to learn. Positional
 encodings are introduced at the inputs of the transformer model, to
 encode sequential or positional information numerically by adding some
 trigonometric function values.</p>
+<p>One way to think of the positional encoding is from a discrete/binary
+perspective. Think of adding a vector represented in binary for each
+token, to represent its position.</p>
+<p><strong>5.) Encoder-Decoder Architecture:</strong><br />
+Finally, the encoder-decoder architecture joins two separate components
+of MHSA+FFN w/ residual connections and layer normalization together.
+The encoder architecture is pretty much the "transformer" we described,
+however, the true "transformer" consists of this joint encoder-decoder
+architecture. The decoder is very similar to the encoder portion, except
+that the key and query values are passed from the outputs of the encoder
+self-attention (so the decoder attention heads are not fully "self").
+Secondly, the output tokens are masked/hidden at each "timestep" or up
+to token <span class="math inline">\(t\)</span>, to ensure the decoder
+only uses what it has predicted thus far, and the tokens it knows thus
+far. Just to make this whole idea more concrete, think of the encoder
+token block as an english sentence. We first contextualize them into a
+dynamic embedding space. In the decoder section, we want to take these
+embeddings and "translate", or rather pick a certain set of words in
+another other domain language, e.g., French (which will have the highest
+probability in this word distribution), or in the training step, learn
+to maximize the next word in the true label sentence in French.</p>
 </body>
 </html>
