@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <link rel="stylesheet" type="text/css" href="learningsCSS/imagedim.css" />
+  <meta name="author" content="Duke Kwon" />
+  <title>KKT Conditions, Duality, and Farka’s/Gordan’s Theorem</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">KKT Conditions, Duality, and Farka’s/Gordan’s
+Theorem</h1>
+<p class="author">Duke Kwon</p>
+</header>
+<p><img class="miniImg" src="../images/dkSurprised.png" /></p>
+<p><em>Above: Me, after realizing what Gordan's Theorem actually does years after my Intro Optimization class, circa 2024</em></p>
+<p><em>Draft 1: 6/11/24</em></p>
+<p><strong>Recommended Background:</strong><br />
+Linear Algebra: column/row space, linear independence, geoemetric
+intuition; Multivariable Calculus: gradients and lagrange multipliers;
+Optimization Theory: Lagrangian, dualization</p>
+<p><strong>Key Takeaways:</strong><br />
+The simple geometric interpretation of Farka’s/Gordan’s Theorem, in the
+context of KKT Conditions.</p>
+<p><strong>Quick Intro:</strong><br />
+When I was first learning optimization theory, I never really understood
+how Farka’s Theorem worked. Some intuition can be derived from the
+proof, but even then, I was lost whenever it was applied throughout that
+semester. Only until I started self-studying and saw it applied was when
+I realized how simple it was! Of course, this is assuming you have a
+strong geometric understanding of linear algebra (This was a very common
+theme in my multiple exposures to linear algebra – geometric
+interpretation preceded true understanding and motivation).</p>
+<p><strong>Motivation &amp; Uses:</strong><br />
+Farka’s/Gordan’s theorem is used extensively to derive and prove
+optimality conditions, such as the KKT conditions. Also it’s pretty cool
+since it’s an either/or type of theorem (one or the other is always
+true).</p>
+<p><strong>Farka’s Theorem:</strong><br />
+Let <span class="math inline">\({\mathbf{A}}\in \mathbb{R}^{(m+1)\times
+d}\)</span>, and <span class="math inline">\({\mathbf{c}}\in
+\mathbb{R}^d\)</span>. Then exactly one of the following two systems has
+a solution: <span class="math display">\[\begin{aligned}
+\mbox{\textbf{\textit{System 1: }}}&amp; {\mathbf{A}}{\mathbf{x}}\leq
+\mathbf{0}\mbox{ and } {\mathbf{c}}^\top{\mathbf{x}}&gt; 0 \mbox{ for
+some } {\mathbf{x}}\in \mathbb{R}^d.\\
+\mbox{\textbf{\textit{System 2: }}}&amp; {\mathbf{A}}^\top{\mathbf{y}}=
+{\mathbf{c}}\mbox{ and } {\mathbf{y}}\geq 0 \mbox{ for some }
+{\mathbf{y}}\in \mathbb{R}^{(m+1)}.
+\end{aligned}\]</span></p>
+<p>Setting <span class="math inline">\({\mathbf{c}}= \mathbf{0}\)</span>
+and moving the equality constraint, we get Gordan’s theorem:<br /><br />
+
+<strong>Corollary: Gordan’s Theorem:</strong><br />
+Let <span class="math inline">\({\mathbf{A}}\in \mathbb{R}^{(m+1)\times
+d}\)</span>, and <span class="math inline">\({\mathbf{c}}\in
+\mathbb{R}^d\)</span>. Then exactly one of the following two systems has
+a solution: <span class="math display">\[\begin{aligned}
+\mbox{\textbf{\textit{System 1: }}}&amp; {\mathbf{A}}{\mathbf{x}}&lt;
+\mathbf{0}\mbox{ for some } {\mathbf{x}}\in \mathbb{R}^d.\\
+\mbox{\textbf{\textit{System 2: }}}&amp; {\mathbf{A}}^\top{\mathbf{y}}=
+\mathbf{0}, {\mathbf{y}}\geq 0 \mbox{ for some } {\mathbf{y}}\in
+\mathbb{R}^{(m+1)}.
+\end{aligned}\]</span></p>
+<p><em>This is modified out of Bazaraa, Sherali, and Shetty’s Nonlinear
+Programming.</em></p>
+<p>Now, without any context, one might wonder why would anyone have
+decided that this was something needed abstractly? There are an infinite
+amount of proofs one can likely construct with respect to how various
+systems interact, but this one was proven.<br />
+Reasoning the behavior of the systems thinking about column and row
+spaces is a start, but the problem (along with the understanding of KKT
+conditions) becomes incredibly clear when we think about it in terms of
+gradients of an objective function, and constraints.</p>
+<p>It’ll also become clear as to why I defined the dimensions as <span
+class="math inline">\((m+1)\)</span> and <span
+class="math inline">\(d\)</span>.</p>
+<p>Let’s declare our standard optimization problems.<br />
+  <br />
+<strong>The Primal Problem P:</strong><br />
+First, here’s the primal problem, which is just a fancy way to say the
+original constrained optimization problem <span
+class="math inline">\(P\)</span>.<br />
+<span class="math display">\[\begin{aligned}
+&amp;\mathop{\mathrm{minimize}}_{{\mathbf{x}}\in \mathbb{R}^d}
+f({\mathbf{x}})\\
+&amp;\mbox{ s.t. }{\mathbf{A}}{\mathbf{x}}\leq {\mathbf{b}}, \mbox{
+where } {\mathbf{A}}\in \mathbb{R}^{m\times d}, {\mathbf{b}}\in
+\mathbb{R}^m
+\end{aligned}\]</span> In case you’re not familiar with how an
+optimization problem is written in standard notation, basically we want
+to minimize some function <span class="math inline">\(f\)</span> of
+<span class="math inline">\({\mathbf{x}}\)</span>, subject to <span
+class="math inline">\(m\)</span> inequality or equality constraints (we
+can always write inequality constraints to be less than some constant,
+<span class="math inline">\(x&gt;0 \implies -x \leq 0\)</span>, and also
+write equality constraints as 2 separate inequality constraints, <span
+class="math inline">\(x=0 \Leftrightarrow x \leq 0 \mbox{ and } -x \leq
+0\)</span>).<br />
+<br />
+<strong>Karush-Kuhn-Tucker (KKT) Points:</strong><br />
+Now it turns out, a necessary condition of a solution to the primal
+problem <span class="math inline">\(P\)</span> is that it must be a KKT
+point. The KKT conditions define what’s considered a KKT point, via the
+following:<br />
+<span class="math inline">\(\bar{{\mathbf{x}}}\)</span> is a KKT Point
+if:<br />
+<span class="math display">\[\begin{aligned}
+&amp;1.) \mbox{ Primal Feasibility (PF): } \bar{{\mathbf{x}}} \mbox{ is
+a solution to } P.\\
+&amp;\mbox{There exists } {\boldsymbol{\lambda}}\geq 0 \mbox{ s.t. }\\
+&amp;2.) \mbox{ Dual Feasibility (DF): } \nabla f({\mathbf{x}}) +
+{\boldsymbol{\lambda}}^\top\nabla {\mathbf{g}}({\mathbf{x}}) = 0\\
+&amp;3.) \mbox{ Complementary Slackness (CS): }
+{\boldsymbol{\lambda}}^\top{\mathbf{g}}({\mathbf{x}}) = 0
+\end{aligned}\]</span></p>
+<p>Where <span class="math inline">\({\mathbf{g}}({\mathbf{x}}) =
+{\mathbf{A}}{\mathbf{x}}- {\mathbf{b}}\)</span>, so <span
+class="math inline">\({\mathbf{g}}({\mathbf{x}}) \leq 0\)</span>.<br />
+Why does a solution have to be a KKT point? This is where Gordan’s
+Theorem comes into play. Let’s define the variables as follows:<br />
+<span class="math display">\[{\mathbf{A}}=
+\begin{bmatrix}
+\rule[.5ex]{2.5ex}{0.5pt}&amp;\nabla
+f({\mathbf{x}})^\top&amp;\rule[.5ex]{2.5ex}{0.5pt}\\
+\rule[.5ex]{2.5ex}{0.5pt}&amp;\nabla
+g_1({\mathbf{x}})^\top&amp;\rule[.5ex]{2.5ex}{0.5pt}\\
+&amp; \vdots &amp; \\
+\rule[.5ex]{2.5ex}{0.5pt}&amp;\nabla
+g_m({\mathbf{x}})^\top&amp;\rule[.5ex]{2.5ex}{0.5pt}\\
+
+\end{bmatrix}, \quad {\mathbf{y}}= {\boldsymbol{\lambda}}\]</span></p>
+<p>Where <span class="math inline">\({\mathbf{x}}\)</span> is in the
+negative half-space of the direction of the gradient, i.e., <span
+class="math inline">\({\mathbf{x}}\in \{{\mathbf{d}}\in \mathbb{R}^d
+\mid {\mathbf{d}}^\top\nabla f({\mathbf{x}}) &lt; 0\}\)</span>. We can
+just consider this a descent direction with some scalar <span
+class="math inline">\(\alpha &gt; 0\)</span>. Note the dimensions of
+<span class="math inline">\({\mathbf{A}}\)</span>!</p>
+<p>If System 1 is true, <span
+class="math inline">\({\mathbf{A}}{\mathbf{x}}&lt; \mathbf{0}\)</span>
+states that there exists some descent direction <span
+class="math inline">\({\mathbf{x}}\)</span> that lies in the direction
+of the negative closed cone of the gradient vectors. That is, there
+exists a descent direction (both feasible and decreasing) <span
+class="math inline">\({\mathbf{x}}\)</span> such that <span
+class="math inline">\(\nabla f({\mathbf{x}})^\top{\mathbf{x}}&lt;
+0\)</span>, and <span class="math inline">\(\nabla
+g_i({\mathbf{x}})^\top{\mathbf{x}}&lt; 0\)</span> for all <span
+class="math inline">\(i\)</span>, which means we’re not at an optimal
+point!</p>
+<p>Intuitively, we’re projecting <span
+class="math inline">\({\mathbf{x}}\)</span> onto the gradient vectors.
+If there exists a <span class="math inline">\({\mathbf{x}}\)</span> that
+results in only negative projections, we can further decrease the
+objective value. To be a descent direction, we obviously want <span
+class="math inline">\(\nabla f({\mathbf{x}})^\top{\mathbf{x}}&lt;
+0\)</span>, and to be a feasible direction, we want that <span
+class="math inline">\({\mathbf{g}}({\mathbf{x}}) \leq
+\mathbf{0}\)</span>, so we also want to move in the negative gradient
+for the constraints. Eventually, either <span
+class="math inline">\(g_i({\mathbf{x}})\)</span> will be unconstrained
+in the direction of <span class="math inline">\(-\nabla
+f({\mathbf{x}})\)</span> (so <span
+class="math inline">\(g_i({\mathbf{x}}) \rightarrow -\infty\)</span>
+until the optimal <span class="math inline">\(f\)</span> is met), or
+will be constrained in the direction of the negative gradient such that
+we can’t go any further, so <span
+class="math inline">\(g_j({\mathbf{x}}) = 0\)</span>, which we call a
+<em>tight</em> or <em>binding</em> constraint.</p>
+<p>The geometry of system 2 accurately reflects the intuition at the
+optimum. Eventually, we’ll reach a point where <span
+class="math inline">\({\mathbf{A}}^\top{\boldsymbol{\lambda}}=
+0\)</span> with <span class="math inline">\({\mathbf{y}}\geq 0\)</span>.
+That is, <span class="math inline">\(\nabla f({\mathbf{x}})\)</span> is
+non-negatively linearly dependent to the vectors <span
+class="math inline">\(\nabla g_i({\mathbf{x}})\)</span> (non-negatively
+meaning that <span class="math inline">\(\nabla f({\mathbf{x}})\)</span>
+lies in the non-negative cone spanned by <span
+class="math inline">\(\nabla g_i({\mathbf{x}})\)</span> for binding
+constraints <span class="math inline">\(i\)</span>). We required <span
+class="math inline">\({\boldsymbol{\lambda}}\geq \mathbf{0}\)</span> as
+a part of how we defined our constraints <span
+class="math inline">\({\mathbf{g}}({\mathbf{x}})\)</span>.</p>
+<p>Notice that <span class="math inline">\({\mathbf{A}}{\mathbf{x}}\neq
+0\)</span>, which means <span
+class="math inline">\({\mathbf{x}}\)</span> corresponds to the feasible
+descent space being an interior point.</p>
+<p>Farka’s Theorem ends up being a generalization, where instead of
+<span class="math inline">\({\mathbf{c}}= \mathbf{0}\)</span>, the
+half-space generated by <span
+class="math inline">\({\mathbf{c}}\)</span> is partially contained in
+the non-negative cone spanned by the rows of <span
+class="math inline">\({\mathbf{A}}\)</span>.<br />
+Enjoy my horrible sketches :’)</p>
+
+<p><img class="miniImg" src="../images/System1KKT.jpg" /></p>
+<span class="math inline">System 1, Above: \(\mathbf{a}_i\) corresponds to gradient vectors. In green is the feasible space \(\mathbf{x}_i\), where the half-space of \(\mathbf{c}\) lies in the non-positive linear combination of the \(\mathbf{a}_i\).</span>
+<p><img class="miniImg" src="../images/System2KKT.jpg" /></p>
+<p>System 2, Above: \(\mathbf{a}_i\) corresponds to gradient vectors. \(\mathbf{c}\) lies in the non-negative linear combination (non-negatively linearly dependent) of the \(\mathbf{a}_i\).</p>
+<p><br/>
+<strong>Duality:</strong><br />
+It turns out there’s a flipped perspective of the primal problem <span
+class="math inline">\(P\)</span>, called the dual problem <span
+class="math inline">\(D\)</span>.</p>
+<p>The dual problem <span class="math inline">\(D\)</span> relaxes the
+constraints on the primal problem <span class="math inline">\(P\)</span>
+by adding lagrange multipliers to the constraints which act as penalty
+parameters, alongside some modified constraints.<br />
+The standard form of the dual writes the constraints as the following,
+<span class="math inline">\({\mathbf{g}}({\mathbf{x}}) =
+{\mathbf{A}}{\mathbf{x}}- {\mathbf{b}}\)</span>, so <span
+class="math inline">\({\mathbf{g}}({\mathbf{x}}) \leq 0\)</span>. Our
+problem then becomes:<br />
+<span class="math display">\[\begin{aligned}
+&amp;\mathop{\mathrm{maximize}}_{{\boldsymbol{\lambda}}\in \mathbb{R}^m}
+\inf_{{\mathbf{x}}\in \mathbb{R}^n} \{f({\mathbf{x}}) +
+{\boldsymbol{\lambda}}^\top{\mathbf{g}}({\mathbf{x}}) \}\\
+&amp;\mbox{ s.t. }{\boldsymbol{\lambda}}\geq 0\\
+&amp; {\mathbf{g}}({\mathbf{x}}) \leq 0\\
+\end{aligned}\]</span></p>
+<p>More on duality soon! There are some pretty cool ties between the
+primal and dual, and depending on convexity, can help us find the
+others’ optimal solution.<br />
+</p>
+</body>
+</html>
