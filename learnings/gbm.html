@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <link rel="stylesheet" type="text/css" href="learningsCSS/imagedim.css" />
+  <meta name="author" content="Duke Kwon" />
+  <title>Understanding Gradient Boosting</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<p><img class="miniImg" src="../images/XKumiko.jpg" /></p>
+<p><em>Above: Literally me procrastinating all my work but decided to put Kumiko here just because hehe.</em></p>
+<header id="title-block-header">
+<h1 class="title">Understanding Gradient Boosting</h1>
+<p class="author">Duke Kwon</p>
+</header>
+<p><em>Draft 1: 6/12/24</em></p>
+<p><strong>Recommended Background:</strong><br />
+Understanding of gradients, hessians, basic machine learning theory
+(loss, functional approximation, generalization).</p>
+<p><strong>Key Takeaways:</strong><br />
+Mathematically intuitive understanding of gradient boosting.</p>
+<p><strong>Preliminaries:</strong><br />
+At a high level, gradient boosting can be thought of as functional
+gradient descent – iteratively (greedily) learning a series of functions
+fit to the negative gradient (residual) of the loss function. This
+differs from the classical approach of optimizing the parameters of the
+loss function, which in turn would result in a decrease in loss. It can
+be thought of as a type of ensemble learning, where high bias, low
+variance learners produce a mathematically combined (in this case, via a
+learning-rate weighted sum) prediction. More on this later.<br />
+Just some standard notation:<br />
+<span class="math inline">\({\mathbf{D}}\)</span> corresponds to the a
+real <span class="math inline">\(n \times d\)</span> data matrix, where
+<span class="math inline">\({\mathbf{x}}_i \in \mathbb{R}^d\)</span>
+corresponds to datapoint or row entry <span
+class="math inline">\(i\)</span>, and <span
+class="math inline">\({\mathbf{X}}_j \in \mathbb{R}^n\)</span>
+corresponds to attribute or column entry <span
+class="math inline">\(j\)</span>. We have predictor regression values
+<span class="math inline">\({\mathbf{y}}\in \mathbb{R}^n\)</span>.</p>
+<p>You definitely could use GBMs for other learning tasks such as an
+unsupervised approach without loss of generality, but let’s keep it
+simple with a supervised learning task. Rigorously defining the problem
+space, we want to learn a function that is optimal (with respect to our
+choice of loss/metric) on average across the probability distribution of
+<span class="math inline">\({\mathbf{x}}\)</span>: <span
+class="math display">\[f^* =
+\mathop{\mathrm{arg\,min}}_{f}\mathbb{E}_{\mathbf{x}}\left[{f({\mathbf{x}},
+{\mathcal{L}}({\mathbf{x}}))}\right].\]</span> (Of course, the true
+optimal would be to learn <span class="math inline">\(f^*({\mathbf{x}})
+= {\mathbf{y}})\)</span> for all <span
+class="math inline">\({\mathbf{x}}\)</span>, but obviously we’re
+assuming this isn’t feasible). In other words, we want to learn some
+model to predict a class or regression value, and we want it to
+generalize well to any future data we encounter.</p>
+<p><strong>CART</strong>, Classification and Regression Trees, is the
+standard "weak" learner boosting procedures tend to use. The intuition
+between the two problem classes are very similar, so we’ll show the
+intuition primarily for the regression case.<br />
+<strong>Regression Trees:</strong><br />
+If you’re unfamiliar with binary decision tree models, the regression
+tree model learns some threshold (numerical or class-oriented) on a
+randomly selected feature <span
+class="math inline">\({\mathbf{X}}_s\)</span> (<span
+class="math inline">\(s\)</span> for selected) that minimizes a certain
+loss function at each iteration. The decision tree function can be
+interpreted as splitting the prediction space/range into regions <span
+class="math inline">\(R_m\)</span>, with some prediction regression
+value <span class="math inline">\(c_m\)</span>. <span
+class="math display">\[f({\mathbf{x}}) = \sum_{i = m}^{M}c_m
+I[{\mathbf{x}}\in R_m]\]</span></p>
+<p>The regions are learned iteratively and greedily. Let’s take a look
+at the first iteration (generalized to any): we take some random
+attribute <span class="math inline">\({\mathbf{X}}_s\)</span>, and pick
+the datapoint that minimize the sum of square errors (SSE) against the
+mean predictor value (or any loss of our choice) across its generated
+regions <span class="math inline">\(R_1\)</span> and <span
+class="math inline">\(R_2\)</span>. Note that we pick the datapoints as
+split points for generality because the domain of <span
+class="math inline">\({\mathbf{X}}_i\)</span> could be infinite, <span
+class="math inline">\(\mathbb{R}\)</span>. We could discretize the real
+numbers and try each one, but since we have a finite number of
+datapoints, we can just do this directly using the datapoints as
+discrete split points. Formally, <span
+class="math display">\[\begin{aligned}
+&amp;\bar{{\mathbf{x}}} = \mathop{\mathrm{arg\,min}}_{{\mathbf{x}}^* \in
+R_1 \cap R_2} \sum_{{\mathbf{x}}_i \in R_1}({\mathbf{x}}_{i} -
+{\mu}_1)^2 +  \sum_{{\mathbf{x}}_j \in R_2}({\mathbf{x}}_{j} -
+{\mu}_2)^2\\
+&amp;\mbox{Where } {\mathbf{x}}_i \in R_1 \mbox{ if } x_{i,s} \leq
+x^*_s, \mbox{ and } {\mathbf{x}}_j \in R_2 \mbox{ if } x_{j,s} &gt;
+x^*_s\\
+\end{aligned}\]</span></p>
+<p>It’s hard to not overload the notation and make it look unnecessarily
+complex, but basically <span class="math inline">\(x_{i,s}\)</span>
+refers to the <span class="math inline">\(i-\)</span>th datapoint’s
+attribute value at <span class="math inline">\(s\)</span>, and <span
+class="math inline">\(x^*_s\)</span> is the attribute value at <span
+class="math inline">\(s\)</span> of the candidate optimal datapoint to
+split on.</p>
+<p><span class="math inline">\(\mu\)</span> here is just used to denote
+the mean predictor value of datapoints within that region, e.g., <span
+class="math display">\[{\mu_1} = \frac{1}{|R_1|}\sum_{{\mathbf{x}}_i \in
+R_1}y_{i},\quad {\mu_2} = \frac{1}{|R_2|}\sum_{{\mathbf{x}}_i \in
+R_2}y_{i}\]</span></p>
+<p>Note that at each iteration, we expect to do this splitting process
+for each of the terminal leaf nodes. <span
+class="math inline">\(M-1\)</span> iterations or splits gives us a total
+of <span class="math inline">\(M\)</span> leaf nodes that characterize a
+region <span class="math inline">\(R_m\)</span> at a certain predicted
+value <span class="math inline">\(c_m\)</span>.</p>
+<p><strong>Hyperparameters, Overfitting, Variance, and Pruning by
+Loss:</strong><br />
+Coming Soon: Picking depth, strengths &amp; weaknesses of gbm models,
+and ways to mitigate it.<br />
+<strong>Depth Intuition via ANOVA:</strong><br />
+Coming Soon: How tree depth and choice of the random attribute split
+corresponds to higher order interactions between attributes.<br />
+<strong>Gradient Boosting (Gradient Boosted Trees):</strong><br />
+Coming Soon: Fitting residuals of gradients and hessians, shrinkage,
+bagging.<br />
+<strong>Interpretability:</strong><br />
+Loss-relative importance, and partial-dependence plots.<br />
+</p>
+</body>
+</html>
